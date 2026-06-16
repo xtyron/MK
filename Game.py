@@ -1,10 +1,6 @@
 import pygame
-
 import json
 from player import Player
-
-x = 0
-y = 0
 
 
 player_img = pygame.image.load("res/player_forward_movement_1.PNG")
@@ -15,20 +11,28 @@ pygame.init()
 player = Player("Masha", 100, 12)
 
 clock = pygame.time.Clock()
-map_list = [[1,1,1,1,1,1,1],
-            [2,2,2,2,2,2,1],
-            [3,3,3,3,3,3,1],
-            [4,4,4,4,4,4,1],
-            [5,5,5,5,5,5,1],
-            [6,6,6,6,6,6,1],
-            [6,6,6,6,6,6,1],
-            [6,6,6,6,6,6,1]
-            ]
-with open("Cozy Garten\startingmap.json", "w") as f:
-     json.dump(map_list, f)
+
+
+with open("Cozy Garten\Startingmap.json", "r", encoding="utf-8") as f:
+     starting_map = json.load(f)
+     print(f"Map file opened, map looks like: {starting_map}\n maps length {len(starting_map)}")
 
 rechtange_size = 32
-rechtange_amount = len(map_list)
+
+def drawmap(surface, map_data : list):
+     for i in range(len(map_data)):
+          for j in range(len(map_data[i])):
+               if map_data[i][j] == 1:
+                    color = (255,255,255)
+               elif map_data[i][j] == 6:
+                    color = (20,20,20)
+               else:
+                    color = (0,0,0)
+               
+               pygame.draw.rect(surface, color, (j * rechtange_size, i * rechtange_size, rechtange_size, rechtange_size))
+
+
+rechtange_amount = len(starting_map)
 
 
 screen_height = rechtange_size * rechtange_amount
@@ -43,18 +47,8 @@ running = True
 
 
 
-font = pygame.font.SysFont(None, 30)
+font = pygame.font.SysFont(None, 20)
 
-for i in range(len(map_list)):
-    x = 0
-    if i != 0:
-        y += rechtange_size
-    for j in range(len(map_list[i])):
-            if map_list[i][j] == 1:
-                 
-                pygame.draw.rect(screen,(0,250,0),(x, y, rechtange_size, rechtange_size))
-                pygame.draw.rect(screen,(0,0,0), (x+1, y+1, rechtange_size - 2, rechtange_size - 2))
-            x += rechtange_size
 
 
 while running:
@@ -63,10 +57,9 @@ while running:
             running = False
         
     coordinates_in_str = "x: " + str(player.x) + " y: " + str(player.y)
+    coordinates_in_str = font.render(coordinates_in_str, True, "red")
 
-    screen.fill((0,0,0))
-
-    text = font.render(coordinates_in_str, True, (255, 255, 255))
+    drawmap(screen, starting_map)
 
     keys = pygame.key.get_pressed()
 
@@ -82,10 +75,18 @@ while running:
     if keys[pygame.K_d]:
          player.x += player.movement_speed
          print("right")
+    if keys[pygame.K_f]:
+         with open("Cozy Garten/startingmap.json", "w") as f:
+               starting_map[0][2] = 9
+               json.dump(starting_map, f)
+    if keys[pygame.K_x]:
+         with open("Cozy Garten/startingmap.json", "w") as f:
+               starting_map[0][2] = 1
+               json.dump(starting_map, f)
 
     screen.blit(player_img,(player.x, player.y))
 
-    screen.blit(text,(0, 0))   
+    screen.blit(coordinates_in_str, (0, 0))   
 
     pygame.display.flip()
 
